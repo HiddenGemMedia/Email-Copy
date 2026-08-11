@@ -1288,7 +1288,7 @@ function buildTemplateWeek7v2({ client, copy, images, footerData, isHeroGenerate
 
   <!-- HERO: transparent PNG or CSS inset-card preview -->
   ${isHeroGenerated
-    ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><img src="${heroImg}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></div>`
+    ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${heroImg}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></a></div>`
     : `<div style="line-height:0;font-size:0;background-color:${pageBg};">
     <div style="position:relative;width:600px;height:720px;overflow:hidden;background:#1a1a1a;">
       ${heroImg ? `<img src="${heroImg}" style="position:absolute;top:${Math.min(0,Math.max(720*(1-heroScale),-(720*(heroScale-1)/2)+heroY))}px;left:${Math.min(0,Math.max(600*(1-heroScale),-(600*(heroScale-1)/2)+heroX))}px;width:${600*heroScale}px;height:${720*heroScale}px;object-fit:cover;display:block;"/>` : `<div style="width:600px;height:720px;background:#2a2a2a;"></div>`}
@@ -1308,15 +1308,15 @@ function buildTemplateWeek7v2({ client, copy, images, footerData, isHeroGenerate
     <table width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;border-collapse:collapse;line-height:0;font-size:0;">
       <tr>
         <td width="196" style="width:196px;padding:0;line-height:0;font-size:0;">
-          ${img1 ? `<div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img1}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img1Obj)};transform:translate(${img1X}px,${img1Y}px) scale(${img1Scale});transform-origin:center center;"/></div>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
+          ${img1 ? `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img1}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img1Obj)};transform:translate(${img1X}px,${img1Y}px) scale(${img1Scale});transform-origin:center center;"/></div></a>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
         </td>
         <td width="6" style="width:6px;padding:0;background-color:${pageBg};line-height:0;font-size:0;"> </td>
         <td width="196" style="width:196px;padding:0;line-height:0;font-size:0;">
-          ${img2 ? `<div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img2}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img2Obj)};transform:translate(${img2X}px,${img2Y}px) scale(${img2Scale});transform-origin:center center;"/></div>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
+          ${img2 ? `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img2}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img2Obj)};transform:translate(${img2X}px,${img2Y}px) scale(${img2Scale});transform-origin:center center;"/></div></a>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
         </td>
         <td width="6" style="width:6px;padding:0;background-color:${pageBg};line-height:0;font-size:0;"> </td>
         <td width="196" style="width:196px;padding:0;line-height:0;font-size:0;">
-          ${(img3 || img1) ? `<div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img3 || img1}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img3 ? img3Obj : img1Obj)};transform:translate(${img3X}px,${img3Y}px) scale(${img3Scale});transform-origin:center center;"/></div>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
+          ${(img3 || img1) ? `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:196px;height:260px;overflow:hidden;line-height:0;font-size:0;"><img src="${img3 || img1}" alt="" width="196" style="width:196px;height:260px;object-fit:cover;object-position:${focalPos(img3 ? img3Obj : img1Obj)};transform:translate(${img3X}px,${img3Y}px) scale(${img3Scale});transform-origin:center center;"/></div></a>` : `<div style="width:196px;height:260px;background:#2a2a2a;"></div>`}
         </td>
       </tr>
     </table>
@@ -1341,11 +1341,11 @@ function buildTemplateWeek7v2({ client, copy, images, footerData, isHeroGenerate
   <!-- STAMP DESIGN (from Week 7) — grid uses img1/2/3, stamp uses Sub Image 4 -->
   ${isHeroGenerated && img5
     ? `<div style="padding:20px 0 0;background-color:${pageBg};text-align:center;line-height:0;font-size:0;">
-          <img src="${img5}" alt="" width="400" style="width:400px;max-width:100%;display:block;margin:0 auto;border:0;"/>
+          <a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${img5}" alt="" width="400" style="width:400px;max-width:100%;display:block;margin:0 auto;border:0;"/></a>
         </div>`
     : img4
     ? `<div style="padding:20px 0 0;background-color:${pageBg};text-align:center;line-height:0;font-size:0;">
-          <div style="display:inline-block;position:relative;width:400px;height:500px;overflow:hidden;background:#c8c0b5;border-radius:0;">
+          <a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="display:inline-block;position:relative;width:400px;height:500px;overflow:hidden;background:#c8c0b5;border-radius:0;">
             <img src="${img4}" alt="" style="position:absolute;top:0;left:0;width:400px;height:500px;object-fit:cover;object-position:${focalPos(img4Obj)};display:block;transform:translate(${img4X}px,${img4Y}px) scale(${img4Scale});transform-origin:center center;"/>
             <div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;">
               <div style="position:relative;width:365px;height:478px;">
@@ -1355,7 +1355,7 @@ function buildTemplateWeek7v2({ client, copy, images, footerData, isHeroGenerate
                 </div>
               </div>
             </div>
-          </div>
+          </div></a>
         </div>`
     : ''}
 
@@ -1455,7 +1455,7 @@ ${(() => {
     : `<span style="font-family:Arial,sans-serif;font-size:${Math.round(logoSize*0.38)}px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${logoColor==='black'?'#000':'#fff'};">${client?.name||''}</span>`
   return `<div style="line-height:0;font-size:0;background-color:${pageBg};">
     ${isHeroGenerated && heroImg
-      ? `<img src="${heroImg}" alt="" style="width:600px;max-width:100%;display:block;border:0;"/>`
+      ? `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${heroImg}" alt="" style="width:600px;max-width:100%;display:block;border:0;"/></a>`
       : `<div style="position:relative;width:100%;height:680px;overflow:hidden;background:#1a1a1a;">
           ${heroImg ? `<img src="${heroImg}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:${heroFp};transform:translate(${heroX}px,${heroY}px) scale(${heroScale});transform-origin:center center;display:block;"/>` : `<div style="position:absolute;inset:0;background:#2a2a2a;"></div>`}
           <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0) 35%,rgba(0,0,0,0) 48%,rgba(0,0,0,0.55) 75%,rgba(0,0,0,0.72) 100%);"></div>
@@ -1487,8 +1487,8 @@ ${(() => {
 
   <!-- MAP PIN ELEMENT (from Week 8) — Source: Sub Image 1 -->
   ${pinImgUrl
-    ? `<div style="line-height:0;font-size:0;"><img src="${pinImgUrl}" alt="" width="600" style="width:600px;max-width:100%;display:block;border:0;"/></div>`
-    : `<div style="position:relative;width:100%;max-width:600px;height:435px;overflow:hidden;background-color:${pageBg};">
+    ? `<div style="line-height:0;font-size:0;"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${pinImgUrl}" alt="" width="600" style="width:600px;max-width:100%;display:block;border:0;"/></a></div>`
+    : `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:100%;max-width:600px;height:435px;overflow:hidden;background-color:${pageBg};">
     <div style="position:absolute;top:0;left:50%;margin-left:-300px;width:600px;height:435px;overflow:hidden;">
     <div style="position:relative;width:600px;height:520px;margin-left:55px;top:-82px;">
       <svg style="position:absolute;width:0;height:0;overflow:hidden;"><defs>
@@ -1504,18 +1504,18 @@ ${(() => {
       <div style="position:absolute;left:225px;top:185px;width:80px;height:80px;border-radius:50%;background:${pageBg};"></div>
     </div>
     </div>
-  </div>`}
+  </div></a>`}
 
   <!-- LOCATION TITLE + 3-PHOTO GRID -->
   ${(copy.bodyBlock2Title || img2 || img3 || img4 || stampImgUrl) ? `<div style="padding:16px 0 0;background-color:${pageBg};">
     ${copy.bodyBlock2Title ? `<div class="mobile-b2title" style="text-align:center;padding:0 0 20px;font-family:'Lora',Georgia,serif;font-size:22px;font-weight:700;letter-spacing:0;color:${secondary};text-transform:uppercase;">${copy.bodyBlock2Title.toUpperCase()}</div>` : ''}
     ${stampImgUrl
-      ? `<img src="${stampImgUrl}" alt="" width="578" style="width:578px;max-width:100%;display:block;margin:0 auto;border:0;"/>`
+      ? `<a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${stampImgUrl}" alt="" width="578" style="width:578px;max-width:100%;display:block;margin:0 auto;border:0;"/></a>`
       : `<table width="578" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:578px;margin:0 auto;">
       <tr>
-        <td width="33%" style="width:33.33%;padding:0 4px 0 0;vertical-align:top;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img2 ? `<img src="${img2}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img2Obj)};transform:translate(${img2X}px,${img2Y}px) scale(${img2Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></td>
-        <td width="33%" style="width:33.33%;padding:0 4px;vertical-align:top;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img3 ? `<img src="${img3}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img3Obj)};transform:translate(${img3X}px,${img3Y}px) scale(${img3Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></td>
-        <td width="33%" style="width:33.33%;padding:0 0 0 4px;vertical-align:top;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img4 ? `<img src="${img4}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img4Obj)};transform:translate(${img4X}px,${img4Y}px) scale(${img4Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></td>
+        <td width="33%" style="width:33.33%;padding:0 4px 0 0;vertical-align:top;"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img2 ? `<img src="${img2}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img2Obj)};transform:translate(${img2X}px,${img2Y}px) scale(${img2Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></a></td>
+        <td width="33%" style="width:33.33%;padding:0 4px;vertical-align:top;"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img3 ? `<img src="${img3}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img3Obj)};transform:translate(${img3X}px,${img3Y}px) scale(${img3Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></a></td>
+        <td width="33%" style="width:33.33%;padding:0 0 0 4px;vertical-align:top;"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;width:100%;max-width:190px;height:290px;border-radius:24px;overflow:hidden;line-height:0;font-size:0;">${img4 ? `<img src="${img4}" alt="" style="position:absolute;top:0;left:0;width:100%;height:290px;object-fit:cover;display:block;object-position:${focalPos(img4Obj)};transform:translate(${img4X}px,${img4Y}px) scale(${img4Scale});transform-origin:center center;"/>` : `<div style="width:100%;max-width:190px;height:290px;background:#d0d0d0;border-radius:24px;"></div>`}</div></a></td>
       </tr>
     </table>`}
   </div>` : ''}
