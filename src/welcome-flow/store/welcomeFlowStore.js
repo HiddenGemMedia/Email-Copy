@@ -4,9 +4,12 @@
  * Everything lives in localStorage. No Supabase, no server. When we move to a
  * database this store keeps the same shape, so only the read/write calls change.
  *
+ * Welcome Flow keeps its OWN client list — deliberately not wired to
+ * Email_Client_API. These are new onboarding clients, and decoupling means the
+ * campaign client list can change without affecting this.
+ *
  * Shape:
- *   clients: [{ id, name, email, locationId, ghlApiKey, folderUrl, folderId, local }]
- *     - `local: true` means added here rather than pulled from Email_Client_API
+ *   clients: [{ id, name, email, locationId, ghlApiKey, folderUrl, folderId }]
  *     - folderUrl/folderId are the "static info" entered once, reused per email
  *   emails:  { [clientId]: [{ id, position, subject, status, templateId,
  *                             copy, selectedImages, generatedUrls, renderedHtml,
@@ -41,27 +44,6 @@ export const useWelcomeFlowStore = create(
       emails:  {},
 
       // ── clients ────────────────────────────────────────────────────────
-      /** Merge the real client list in without clobbering local edits. */
-      syncClients: (remote = []) => set((s) => {
-        const bySlug = new Map(s.clients.map(c => [c.id, c]))
-        remote.forEach((r) => {
-          const id = `ghl_${r.ghl?.locationId || r.name}`
-          const existing = bySlug.get(id)
-          bySlug.set(id, {
-            id,
-            name:       r.name,
-            email:      existing?.email || '',
-            locationId: r.ghl?.locationId || '',
-            ghlApiKey:  r.ghlApiKey || '',
-            logoUrl:    r.logoUrl || '',
-            folderUrl:  existing?.folderUrl || '',
-            folderId:   existing?.folderId  || '',
-            local:      false,
-          })
-        })
-        return { clients: [...bySlug.values()].sort((a, b) => a.name.localeCompare(b.name)) }
-      }),
-
       addClient: (data) => {
         const id = uid()
         set((s) => ({
@@ -74,7 +56,6 @@ export const useWelcomeFlowStore = create(
             folderUrl:  data.folderUrl?.trim()  || '',
             folderId:   data.folderId?.trim()   || '',
             logoUrl:    '',
-            local:      true,
           }].sort((a, b) => a.name.localeCompare(b.name)),
           emails: { ...s.emails, [id]: [] },
         }))

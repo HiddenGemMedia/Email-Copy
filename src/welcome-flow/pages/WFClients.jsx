@@ -1,13 +1,14 @@
 /**
  * Welcome Flow — clients list.
- * Shows every client we could build a welcome flow for, with per-client counts.
- * Real clients come from Email_Client_API; locally added ones live in localStorage.
+ *
+ * Its OWN client list, deliberately not wired to Email_Client_API. These are new
+ * onboarding clients, so a client is created here with its GHL location id and
+ * API key rather than looked up elsewhere.
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IconSearch, IconPlus, IconChevronRight, IconUsers } from '@tabler/icons-react'
-import { fetchClients } from '../../lib/api'
 import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
 import { useWfTheme, WfCard, WfButton, WfInput, WfPageHeader } from '../components/wfUi'
 
@@ -52,9 +53,9 @@ function ClientCard({ client, counts, onOpen }) {
 
 function AddClientForm({ onCancel, onSave }) {
   const t = useWfTheme()
-  const [f, setF] = useState({ name: '', email: '', locationId: '', folderUrl: '' })
+  const [f, setF] = useState({ name: '', email: '', locationId: '', ghlApiKey: '', folderUrl: '' })
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const valid = f.name.trim().length > 0
+  const valid = f.name.trim() && f.locationId.trim() && f.ghlApiKey.trim()
 
   return (
     <WfCard style={{ padding: 20, marginBottom: 22 }}>
@@ -69,8 +70,12 @@ function AddClientForm({ onCancel, onSave }) {
           <WfInput value={f.email} onChange={set('email')} placeholder="ops@northwind.com" />
         </div>
         <div>
-          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL location ID</label>
-          <WfInput value={f.locationId} onChange={set('locationId')} placeholder="optional" />
+          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL location ID *</label>
+          <WfInput value={f.locationId} onChange={set('locationId')} placeholder="VWszdEOrmbETl88rx85j" />
+        </div>
+        <div>
+          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL API key *</label>
+          <WfInput value={f.ghlApiKey} onChange={set('ghlApiKey')} type="password" placeholder="pit-…" />
         </div>
         <div>
           <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL folder URL</label>
@@ -88,20 +93,9 @@ function AddClientForm({ onCancel, onSave }) {
 export default function WFClients() {
   const navigate = useNavigate()
   const t = useWfTheme()
-  const { clients, syncClients, addClient, counts } = useWelcomeFlowStore()
+  const { clients, addClient, counts } = useWelcomeFlowStore()
   const [q, setQ] = useState('')
   const [adding, setAdding] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let alive = true
-    fetchClients()
-      .then((remote) => { if (alive) syncClients(remote) })
-      .catch(() => {/* offline or API down — locally added clients still work */})
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [syncClients])
-
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     if (!needle) return clients
@@ -113,7 +107,7 @@ export default function WFClients() {
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 24px 64px' }}>
       <WfPageHeader
         title="Welcome Flow"
-        subtitle={loading ? 'Loading clients…' : `${clients.length} account${clients.length === 1 ? '' : 's'}. Open one to see its emails.`}
+        subtitle={`${clients.length} client${clients.length === 1 ? '' : 's'}. Open one to see its emails.`}
         right={
           <>
             <div style={{ position: 'relative' }}>
@@ -150,7 +144,7 @@ export default function WFClients() {
             {q ? 'No clients match that search' : 'No clients yet'}
           </div>
           <div style={{ fontSize: 12.5, color: t.muted, marginTop: 5 }}>
-            {q ? 'Try a different name.' : 'Add one to start building a welcome flow.'}
+            {q ? 'Try a different name.' : 'Welcome Flow keeps its own client list. Add one to get started.'}
           </div>
         </WfCard>
       ) : (
