@@ -499,7 +499,7 @@ function buildTemplateWeek4v2b({ client, copy, images, footerData, isHeroGenerat
 
   <!-- HERO: transparent PNG or CSS inset-card preview -->
   ${isHeroGenerated
-    ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><img src="${heroImg}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></div>`
+    ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${heroImg}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></a></div>`
     : `<div style="padding:20px 20px 0;line-height:0;font-size:0;background-color:${pageBg};">
     <div style="position:relative;width:560px;height:720px;overflow:hidden;border-radius:16px;background:#1a1a1a;">
       ${heroImg ? `<img src="${heroImg}" style="position:absolute;top:${Math.min(0,Math.max(720*(1-heroScale),-(720*(heroScale-1)/2)+heroY))}px;left:${Math.min(0,Math.max(560*(1-heroScale),-(560*(heroScale-1)/2)+heroX))}px;width:${560*heroScale}px;height:${720*heroScale}px;object-fit:cover;display:block;"/>` : `<div style="width:560px;height:720px;background:#2a2a2a;"></div>`}
@@ -527,16 +527,16 @@ function buildTemplateWeek4v2b({ client, copy, images, footerData, isHeroGenerat
   <!-- STACKED PHOTO (Week 4 single-card style: ghost + main) -->
   ${img1
     ? isHeroGenerated && img5
-      ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><img src="${img5}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></div>`
+      ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${img5}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></a></div>`
       : `<div style="padding:0 72px 0;background-color:${pageBg};">
-          <div style="position:relative;height:508px;">
+          <a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;height:508px;">
             <div style="position:absolute;top:24px;left:24px;right:24px;bottom:24px;border-radius:16px;transform:rotate(5deg);transform-origin:center;overflow:hidden;background:#e0dbd3;">
               <img src="${img1}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:${focalPos(img1Obj)};opacity:0.45;display:block;"/>
             </div>
             <div style="position:absolute;top:24px;left:24px;right:24px;bottom:24px;border-radius:16px;overflow:hidden;z-index:1;">
               <img src="${img1}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:${focalPos(img1Obj)};display:block;transform:translate(${img1X}px,${img1Y}px) scale(${img1Scale});transform-origin:center center;"/>
             </div>
-          </div>
+          </div></a>
         </div>`
     : ''}
 
@@ -549,16 +549,16 @@ function buildTemplateWeek4v2b({ client, copy, images, footerData, isHeroGenerat
   <!-- IMG2 STACKED CARD (ghost+main, Week 4 style) -->
   ${img2
     ? isHeroGenerated && img4
-      ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><img src="${img4}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></div>`
+      ? `<div style="line-height:0;font-size:0;background-color:${pageBg};"><a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><img src="${img4}" alt="" width="600" style="width:100%;display:block;max-width:600px;border:0;"/></a></div>`
       : `<div style="padding:20px 72px 0;background-color:${pageBg};">
-          <div style="position:relative;height:508px;">
+          <a href="${copy.ctaUrl||'#'}" style="display:block;text-decoration:none;border:none;outline:none;"><div style="position:relative;height:508px;">
             <div style="position:absolute;top:24px;left:24px;right:24px;bottom:24px;border-radius:16px;transform:rotate(5deg);transform-origin:center;overflow:hidden;background:#e0dbd3;">
               <img src="${img2}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:${focalPos(img2Obj)};opacity:0.45;display:block;"/>
             </div>
             <div style="position:absolute;top:24px;left:24px;right:24px;bottom:24px;border-radius:16px;overflow:hidden;z-index:1;">
               <img src="${img2}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:${focalPos(img2Obj)};display:block;transform:translate(${img2X}px,${img2Y}px) scale(${img2Scale});transform-origin:center center;"/>
             </div>
-          </div>
+          </div></a>
         </div>`
     : ''}
 
