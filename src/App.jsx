@@ -4,6 +4,9 @@ import Dashboard from './pages/Dashboard'
 import NewCampaign from './pages/NewCampaign'
 import ReviewCampaign from './pages/ReviewCampaign'
 import ContentCalendar from './pages/ContentCalendar'
+import WFClients      from './welcome-flow/pages/WFClients'
+import WFClientDetail from './welcome-flow/pages/WFClientDetail'
+import WFBrief        from './welcome-flow/pages/WFBrief'
 import Login from './pages/Login'
 import { useAuth } from './context/AuthContext'
 
@@ -23,6 +26,9 @@ export default function App() {
         <Route path="campaign/new" element={<NewCampaign />} />
         <Route path="campaign/:id/review" element={<ReviewCampaign />} />
         <Route path="calendar" element={<ContentCalendar />} />
+        <Route path="welcome-flow" element={<WFClients />} />
+        <Route path="welcome-flow/:clientId" element={<WFClientDetail />} />
+        <Route path="welcome-flow/:clientId/email/:emailId" element={<WFBrief />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

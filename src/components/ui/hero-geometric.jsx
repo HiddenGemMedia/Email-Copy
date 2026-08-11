@@ -1,10 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { IconDiamond, IconPlayerPlay } from "@tabler/icons-react"
+import { IconDiamond, IconPlayerPlay, IconRoute } from "@tabler/icons-react"
 import { useTheme } from "../../context/ThemeContext"
 
-export default function HeroGeometric({ badge = "Hidden Gem Media", title1 = "Email Production", title2 = "Studio", onStart }) {
+export default function HeroGeometric({ badge = "Hidden Gem Media", title1 = "Email Production", title2 = "Studio", onStart, onWelcomeFlow }) {
   const { theme } = useTheme()
   const dark = theme === 'dark'
 
@@ -81,6 +81,25 @@ export default function HeroGeometric({ badge = "Hidden Gem Media", title1 = "Em
             >
               <IconPlayerPlay size={13} fill={btnText} stroke={0} />
               Start New Campaign
+            </button>
+
+            <button
+              onClick={onWelcomeFlow}
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-200 ml-3"
+              style={{
+                background: 'transparent',
+                border: `1.5px solid ${dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)'}`,
+                color: dark ? 'rgba(255,255,255,0.85)' : '#111827',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = accentColor; e.currentTarget.style.color = accentColor }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = dark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)'
+                e.currentTarget.style.color = dark ? 'rgba(255,255,255,0.85)' : '#111827'
+              }}
+            >
+              <IconRoute size={14} stroke={2} />
+              Start Welcome Flow
             </button>
           </motion.div>
 
