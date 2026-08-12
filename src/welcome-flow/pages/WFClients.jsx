@@ -1,14 +1,18 @@
 /**
  * Welcome Flow — clients list.
  *
- * Its OWN client list, deliberately not wired to Email_Client_API. These are new
- * onboarding clients, so a client is created here with its GHL location id and
- * API key rather than looked up elsewhere.
+ * Reads email_wf_clients from the Welcome Flow Supabase project. A client only
+ * appears once it has been added here, so this is an opt-in roster rather than a
+ * mirror of the campaign client list.
+ *
+ * Adding one takes a GHL location ID, which is matched against Email_Client_API in
+ * the other project. That match supplies the client name and logo; the API key is
+ * resolved server-side at request time and never reaches the browser.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IconSearch, IconPlus, IconChevronRight, IconUsers } from '@tabler/icons-react'
+import { IconSearch, IconPlus, IconChevronRight, IconUsers, IconCheck, IconAlertCircle } from '@tabler/icons-react'
 import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
 import { useWfTheme, WfCard, WfButton, WfInput, WfPageHeader } from '../components/wfUi'
 
@@ -51,39 +55,76 @@ function ClientCard({ client, counts, onOpen }) {
   )
 }
 
-function AddClientForm({ onCancel, onSave }) {
+function AddClientForm({ onCancel, onSave, lookupLocation }) {
   const t = useWfTheme()
-  const [f, setF] = useState({ name: '', email: '', locationId: '', ghlApiKey: '', folderUrl: '' })
+  const [f, setF] = useState({ name: '', email: '', locationId: '', folderUrl: '' })
+  const [match, setMatch] = useState(null)      // null | 'checking' | {…} | 'none'
+  const [saving, setSaving] = useState(false)
+  const [error, setError]   = useState('')
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value })
-  const valid = f.name.trim() && f.locationId.trim() && f.ghlApiKey.trim()
+
+  // resolve the location against the client database as they type
+  useEffect(() => {
+    const loc = f.locationId.trim()
+    if (!loc) { setMatch(null); return }
+    setMatch('checking')
+    const id = setTimeout(async () => {
+      try {
+        const m = await lookupLocation(loc)
+        setMatch(m || 'none')
+        if (m && !f.name.trim()) setF(prev => ({ ...prev, name: m.clientName }))
+      } catch { setMatch('none') }
+    }, 450)
+    return () => clearTimeout(id)
+  }, [f.locationId])   // eslint-disable-line react-hooks/exhaustive-deps
+
+  const matched = match && match !== 'checking' && match !== 'none'
+  const valid   = f.name.trim() && matched && !saving
 
   return (
     <WfCard style={{ padding: 20, marginBottom: 22 }}>
-      <div style={{ fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 14 }}>Add a client</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: t.text, marginBottom: 4 }}>Add a client</div>
+      <div style={{ fontSize: 12, color: t.muted, marginBottom: 14 }}>
+        The location ID is matched against your client database — the GHL key and logo come from there.
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
         <div>
+          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL location ID *</label>
+          <WfInput value={f.locationId} onChange={set('locationId')} placeholder="VWszdEOrmbETl88rx85j" autoFocus />
+          <div style={{ minHeight: 18, marginTop: 6, fontSize: 11.5, display: 'flex', alignItems: 'center', gap: 5 }}>
+            {match === 'checking' && <span style={{ color: t.faint }}>Checking…</span>}
+            {match === 'none' && (
+              <><IconAlertCircle size={13} color="#dc2626" />
+                <span style={{ color: '#dc2626' }}>Not found in the client database</span></>
+            )}
+            {matched && (
+              <><IconCheck size={13} color="#16a34a" />
+                <span style={{ color: '#16a34a' }}>Matched: {match.clientName}</span></>
+            )}
+          </div>
+        </div>
+        <div>
           <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>Client name *</label>
-          <WfInput value={f.name} onChange={set('name')} placeholder="Northwind Coffee" autoFocus />
+          <WfInput value={f.name} onChange={set('name')} placeholder="filled from the match" />
         </div>
         <div>
           <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>Contact email</label>
           <WfInput value={f.email} onChange={set('email')} placeholder="ops@northwind.com" />
         </div>
         <div>
-          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL location ID *</label>
-          <WfInput value={f.locationId} onChange={set('locationId')} placeholder="VWszdEOrmbETl88rx85j" />
-        </div>
-        <div>
-          <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL API key *</label>
-          <WfInput value={f.ghlApiKey} onChange={set('ghlApiKey')} type="password" placeholder="pit-…" />
-        </div>
-        <div>
           <label style={{ fontSize: 11.5, color: t.muted, display: 'block', marginBottom: 5 }}>GHL folder URL</label>
           <WfInput value={f.folderUrl} onChange={set('folderUrl')} placeholder="paste once — reused for every email" />
         </div>
       </div>
+      {error && <div style={{ fontSize: 12, color: '#dc2626', marginTop: 12 }}>{error}</div>}
       <div style={{ display: 'flex', gap: 9, marginTop: 16 }}>
-        <WfButton onClick={() => onSave(f)} disabled={!valid}>Create client</WfButton>
+        <WfButton
+          disabled={!valid}
+          onClick={async () => {
+            setSaving(true); setError('')
+            try { await onSave(f) } catch (e) { setError(e.message); setSaving(false) }
+          }}
+        >{saving ? 'Creating…' : 'Create client'}</WfButton>
         <WfButton variant="ghost" onClick={onCancel}>Cancel</WfButton>
       </div>
     </WfCard>
@@ -93,9 +134,11 @@ function AddClientForm({ onCancel, onSave }) {
 export default function WFClients() {
   const navigate = useNavigate()
   const t = useWfTheme()
-  const { clients, addClient, counts } = useWelcomeFlowStore()
+  const { clients, addClient, counts, fetchClients, lookupLocation, loadingClients, clientsError } = useWelcomeFlowStore()
   const [q, setQ] = useState('')
   const [adding, setAdding] = useState(false)
+
+  useEffect(() => { fetchClients() }, [fetchClients])
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
     if (!needle) return clients
@@ -107,7 +150,7 @@ export default function WFClients() {
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 24px 64px' }}>
       <WfPageHeader
         title="Welcome Flow"
-        subtitle={`${clients.length} client${clients.length === 1 ? '' : 's'}. Open one to see its emails.`}
+        subtitle={loadingClients ? 'Loading clients…' : `${clients.length} client${clients.length === 1 ? '' : 's'}. Open one to see its emails.`}
         right={
           <>
             <div style={{ position: 'relative' }}>
@@ -129,12 +172,19 @@ export default function WFClients() {
       {adding && (
         <AddClientForm
           onCancel={() => setAdding(false)}
-          onSave={(data) => {
-            const id = addClient(data)
+          lookupLocation={lookupLocation}
+          onSave={async (data) => {
+            const id = await addClient(data)
             setAdding(false)
             navigate(`/welcome-flow/${id}`)
           }}
         />
+      )}
+
+      {clientsError && (
+        <WfCard style={{ padding: 16, marginBottom: 18, borderColor: 'rgba(220,38,38,0.35)' }}>
+          <div style={{ fontSize: 13, color: '#dc2626' }}>Could not load clients: {clientsError}</div>
+        </WfCard>
       )}
 
       {filtered.length === 0 ? (

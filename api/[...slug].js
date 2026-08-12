@@ -22,6 +22,7 @@ import { handler as recommendTemplate }  from '../netlify/functions/recommend-te
 import { handler as submitFeedback }     from '../netlify/functions/submit-feedback.js'
 import { handler as uploadLogo }         from '../netlify/functions/upload-logo.js'
 import { handler as uploadScreenshot }   from '../netlify/functions/upload-screenshot.js'
+import { handler as wfClients }          from '../netlify/functions/wf-clients.js'
 
 export const config = {
   api: {
@@ -54,6 +55,7 @@ const HANDLERS = {
   'submit-feedback':     submitFeedback,
   'upload-logo':         uploadLogo,
   'upload-screenshot':   uploadScreenshot,
+  'wf-clients':          wfClients,
 }
 
 export default async function handler(req, res) {

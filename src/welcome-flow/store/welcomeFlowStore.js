@@ -1,12 +1,15 @@
 /**
- * Welcome Flow store — LOCAL ONLY for now.
+ * Welcome Flow store.
  *
- * Everything lives in localStorage. No Supabase, no server. When we move to a
- * database this store keeps the same shape, so only the read/write calls change.
+ * CLIENTS come from the database — email_wf_clients in the Welcome Flow Supabase
+ * project — via /.netlify/functions/wf-clients. They are not persisted locally,
+ * so the server is the single source of truth and stale rows cannot linger.
  *
- * Welcome Flow keeps its OWN client list — deliberately not wired to
- * Email_Client_API. These are new onboarding clients, and decoupling means the
- * campaign client list can change without affecting this.
+ * EMAILS are still localStorage for now; they move to email_wf_emails next.
+ *
+ * A client only appears here once it has been added on this page. The location_id
+ * is the join key: the GHL API key and logo are resolved from the other Supabase
+ * project at request time and never stored here.
  *
  * Shape:
  *   clients: [{ id, name, email, locationId, ghlApiKey, folderUrl, folderId }]
@@ -42,24 +45,43 @@ export const useWelcomeFlowStore = create(
     (set, get) => ({
       clients: [],
       emails:  {},
+      loadingClients: false,
+      clientsError:   null,
 
-      // ── clients ────────────────────────────────────────────────────────
-      addClient: (data) => {
-        const id = uid()
+      // ── clients: server-backed ─────────────────────────────────────────
+      fetchClients: async () => {
+        set({ loadingClients: true, clientsError: null })
+        try {
+          const res  = await fetch('/.netlify/functions/wf-clients')
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`)
+          set({ clients: data.clients || [], loadingClients: false })
+        } catch (e) {
+          set({ clientsError: e.message, loadingClients: false })
+        }
+      },
+
+      /** Validate a GHL location against the client database before creating. */
+      lookupLocation: async (locationId) => {
+        const res  = await fetch('/.netlify/functions/wf-clients?locationId=' + encodeURIComponent(locationId))
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Lookup failed')
+        return data.match
+      },
+
+      addClient: async (data) => {
+        const res  = await fetch('/.netlify/functions/wf-clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        const body = await res.json()
+        if (!res.ok) throw new Error(body.error || `Create failed (${res.status})`)
         set((s) => ({
-          clients: [...s.clients, {
-            id,
-            name:       data.name?.trim()  || 'Untitled client',
-            email:      data.email?.trim() || '',
-            locationId: data.locationId?.trim() || '',
-            ghlApiKey:  data.ghlApiKey?.trim()  || '',
-            folderUrl:  data.folderUrl?.trim()  || '',
-            folderId:   data.folderId?.trim()   || '',
-            logoUrl:    '',
-          }].sort((a, b) => a.name.localeCompare(b.name)),
-          emails: { ...s.emails, [id]: [] },
+          clients: [...s.clients, body.client].sort((a, b) => a.name.localeCompare(b.name)),
+          emails:  { ...s.emails, [body.client.id]: s.emails[body.client.id] || [] },
         }))
-        return id
+        return body.client.id
       },
 
       updateClient: (id, patch) => set((s) => ({
@@ -138,6 +160,10 @@ export const useWelcomeFlowStore = create(
         }
       },
     }),
-    { name: 'welcome-flow-v1' }
+    {
+      name: 'welcome-flow-v1',
+      // clients are server-backed; only emails persist locally
+      partialize: (s) => ({ emails: s.emails }),
+    }
   )
 )
