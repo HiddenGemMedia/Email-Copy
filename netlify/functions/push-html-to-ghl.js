@@ -5,6 +5,10 @@
  * Creates a new GHL email template with the full rendered HTML,
  * OR updates the existing template if templateId is provided.
  * Returns: { success, previewUrl, templateId }
+ *
+ * client.ghlApiKey is optional. The Weekly Email Campaign sends it from the
+ * browser; Welcome Flow Campaign never holds the key client-side, so it sends
+ * only the location and the key is resolved here from Email_Client_API.
  */
 
 const GHL_BASE    = 'https://services.leadconnectorhq.com'
@@ -18,6 +22,21 @@ function ghlHeaders(apiKey) {
   }
 }
 
+async function resolveApiKey(locationId) {
+  const url = process.env.SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY
+  if (!url || !key) return ''
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/Email_Client_API?select=ghl_api_key&location_id=eq.${encodeURIComponent(locationId)}&limit=1`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` } }
+    )
+    if (!res.ok) return ''
+    const [row] = await res.json()
+    return row?.ghl_api_key || ''
+  } catch { return '' }
+}
+
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' }
 
@@ -28,11 +47,11 @@ export const handler = async (event) => {
 
     const { client, renderedHtml, generatedCopy, templateId, locationId: urlLocationId, folderId, templateLabel } = JSON.parse(rawBody)
 
-    const apiKey     = client?.ghlApiKey || process.env.GHL_API_KEY
     const locationId = urlLocationId || client?.ghl?.locationId
+    if (!locationId) throw new Error('No locationId available')
 
-    if (!apiKey)       throw new Error('No GHL API key available')
-    if (!locationId)   throw new Error('No locationId available')
+    const apiKey = client?.ghlApiKey || await resolveApiKey(locationId) || process.env.GHL_API_KEY
+    if (!apiKey) throw new Error(`No GHL API key found for location ${locationId}`)
     if (!renderedHtml) throw new Error('No HTML to push — make sure you preview the template before approving')
 
     console.log(`[push-html-to-ghl] htmlLength=${renderedHtml.length} templateId=${templateId || '(new)'} locationId=${locationId} folderId=${folderId || '(none)'}`)

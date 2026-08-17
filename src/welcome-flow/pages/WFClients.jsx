@@ -32,9 +32,11 @@ function ClientCard({ client, counts, onOpen }) {
           <div style={{ fontSize: 15, fontWeight: 700, color: t.text, letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {client.name}
           </div>
-          <div style={{ fontSize: 12, color: t.faint, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {client.email || (client.locationId ? `Location ${client.locationId.slice(0, 12)}…` : 'No contact set')}
-          </div>
+          {client.email && (
+            <div style={{ fontSize: 12, color: t.faint, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {client.email}
+            </div>
+          )}
         </div>
         <IconChevronRight size={17} color={hover ? t.accent : t.faint} stroke={2} style={{ flexShrink: 0 }} />
       </div>
@@ -149,7 +151,7 @@ export default function WFClients() {
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 24px 64px' }}>
       <WfPageHeader
-        title="Welcome Flow"
+        title="Welcome Flow Campaign"
         subtitle={loadingClients ? 'Loading clients…' : `${clients.length} client${clients.length === 1 ? '' : 's'}. Open one to see its emails.`}
         right={
           <>
@@ -194,7 +196,7 @@ export default function WFClients() {
             {q ? 'No clients match that search' : 'No clients yet'}
           </div>
           <div style={{ fontSize: 12.5, color: t.muted, marginTop: 5 }}>
-            {q ? 'Try a different name.' : 'Welcome Flow keeps its own client list. Add one to get started.'}
+            {q ? 'Try a different name.' : 'The Welcome Flow Campaign keeps its own client list. Add one to get started.'}
           </div>
         </WfCard>
       ) : (

@@ -61,6 +61,21 @@ export const useWelcomeFlowStore = create(
         }
       },
 
+      /**
+       * Fetch clients only if we don't have them yet.
+       *
+       * Clients are server-backed and deliberately not persisted, so a reload or
+       * a hot-reload on a deep route (…/email/:id/preview) starts with an empty
+       * list. Without this, those pages decide the email no longer exists and
+       * bounce the user back to the start. Every page that reads a client calls
+       * this on mount.
+       */
+      ensureClients: async () => {
+        const s = get()
+        if (s.clients.length || s.loadingClients) return
+        await s.fetchClients()
+      },
+
       /** Validate a GHL location against the client database before creating. */
       lookupLocation: async (locationId) => {
         const res  = await fetch('/.netlify/functions/wf-clients?locationId=' + encodeURIComponent(locationId))

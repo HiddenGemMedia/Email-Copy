@@ -27,6 +27,8 @@ shape — *Symptom → What we did → Why it broke → Fix → How to check*. K
 | Text baked into a PNG looks tiny | [9. 1:1 PNGs don't compensate](#9-text-inside-a-baked-png-is-too-small) |
 | An edit changed Week 2 (or another protected template) | [10. Byte-identical blocks](#10-edit-hit-the-wrong-template) |
 | A title/section renders twice | [11. Ported section brought its own title](#11-something-renders-twice) |
+| A fluid template still overflows on mobile by a few px | [12. `white-space:nowrap` on the CTA](#12-fluid-card-still-overflows-a-little) |
+| Media library / images fail with a 401 in one workflow only | [13. `undefined` serialised into a query string](#13-undefined-sent-as-an-api-key) |
 
 ---
 

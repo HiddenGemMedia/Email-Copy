@@ -7,6 +7,10 @@ import ContentCalendar from './pages/ContentCalendar'
 import WFClients      from './welcome-flow/pages/WFClients'
 import WFClientDetail from './welcome-flow/pages/WFClientDetail'
 import WFBrief        from './welcome-flow/pages/WFBrief'
+import WFCopy         from './welcome-flow/pages/WFCopy'
+import WFImages       from './welcome-flow/pages/WFImages'
+import WFPreview      from './welcome-flow/pages/WFPreview'
+import WFApprove      from './welcome-flow/pages/WFApprove'
 import Login from './pages/Login'
 import { useAuth } from './context/AuthContext'
 
@@ -29,6 +33,10 @@ export default function App() {
         <Route path="welcome-flow" element={<WFClients />} />
         <Route path="welcome-flow/:clientId" element={<WFClientDetail />} />
         <Route path="welcome-flow/:clientId/email/:emailId" element={<WFBrief />} />
+        <Route path="welcome-flow/:clientId/email/:emailId/copy" element={<WFCopy />} />
+        <Route path="welcome-flow/:clientId/email/:emailId/images" element={<WFImages />} />
+        <Route path="welcome-flow/:clientId/email/:emailId/preview" element={<WFPreview />} />
+        <Route path="welcome-flow/:clientId/email/:emailId/approve" element={<WFApprove />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

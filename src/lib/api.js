@@ -45,8 +45,15 @@ export const fetchDriveImages = ({ folderId }) =>
   get('/get-drive-images', { folderId })
 
 // ── GHL Media Library images ─────────────────────────────────────
+// apiKey is optional: omit it and the function resolves it from locationId.
+// It must be left out entirely rather than passed as undefined — URLSearchParams
+// would serialise that as the string "undefined" and it would be used as a token.
 export const fetchGhlImages = ({ locationId, apiKey, folderId }) =>
-  get('/fetch-ghl-images', { locationId, apiKey, ...(folderId ? { folderId } : {}) })
+  get('/fetch-ghl-images', {
+    locationId,
+    ...(apiKey   ? { apiKey }   : {}),
+    ...(folderId ? { folderId } : {}),
+  })
 
 // ── Push custom values to GHL (legacy) ───────────────────────────
 export const pushToGHL = ({ client, renderedHtml, generatedCopy, selectedImages, templateId, locationId }) =>
@@ -65,7 +72,8 @@ export const sendTestEmail = ({ html, subject }) =>
 export const notifyChat = ({ clientName, previewUrl, approvedBy }) =>
   post('/notify-chat', { clientName, previewUrl, approvedBy })
 
-// ── Logo upload → GHL media library + save URL to Sheet ──────────
+// ── Logo upload → GHL media library + save logo_url to Email_Client_API ──
+// apiKey is optional: omit it and the function resolves it from locationId.
 export const uploadLogo = ({ base64, mimeType, fileName, locationId, apiKey, clientRowIndex }) =>
   post('/upload-logo', { base64, mimeType, fileName, locationId, apiKey, clientRowIndex })
 

@@ -80,7 +80,7 @@ export default function HeroGeometric({ badge = "Hidden Gem Media", title1 = "Em
               onMouseLeave={e => { e.currentTarget.style.background = btnBg;   e.currentTarget.style.borderColor = btnBg   }}
             >
               <IconPlayerPlay size={13} fill={btnText} stroke={0} />
-              Start New Campaign
+              Weekly Email Campaign
             </button>
 
             <button
@@ -99,7 +99,7 @@ export default function HeroGeometric({ badge = "Hidden Gem Media", title1 = "Em
               }}
             >
               <IconRoute size={14} stroke={2} />
-              Start Welcome Flow
+              Welcome Flow Campaign
             </button>
           </motion.div>
 

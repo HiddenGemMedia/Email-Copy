@@ -12,7 +12,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IconArrowLeft, IconSparkles, IconBolt } from '@tabler/icons-react'
 import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
-import { useWfTheme, WfCard, WfButton, WfInput } from '../components/wfUi'
+import { useWfTheme, WfCard, WfButton, WfInput, WfStepNav } from '../components/wfUi'
+import { WF_WEEKS, wfWeek, wfWeekReady } from '../wfWeeks'
+import { WF_TEST_VARIATIONS } from '../wfTestData'
 
 /** GHL folder links carry the id as ?folderId=… */
 function folderIdFrom(url = '') {
@@ -24,19 +26,39 @@ export default function WFBrief() {
   const { clientId, emailId } = useParams()
   const navigate = useNavigate()
   const t = useWfTheme()
-  const { getClient, getEmails, updateClient, updateEmail } = useWelcomeFlowStore()
+  const { getClient, getEmails, updateClient, updateEmail, ensureClients, loadingClients } = useWelcomeFlowStore()
+
+  // clients are not persisted — refetch after a reload on this deep route
+  useEffect(() => { ensureClients() }, [ensureClients])
 
   const client = getClient(clientId)
   const email  = (getEmails(clientId) || []).find(e => e.id === emailId)
 
   const [folderUrl, setFolderUrl] = useState('')
   const [prompt, setPrompt]       = useState('')
+  const [week, setWeek]           = useState('')
 
   useEffect(() => {
     if (!client) return
     setFolderUrl(client.folderUrl || '')
     setPrompt(prev => prev || `Client Name: ${client.name}\nTheme:\nAudience:`)
   }, [client])
+
+  // default to this email's slot in the flow — email 3 is usually week 3
+  useEffect(() => {
+    if (!email) return
+    setWeek(String(email.week || email.position || ''))
+  }, [email?.id])   // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (loadingClients && !client) {
+    return (
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 24px' }}>
+        <WfCard style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: t.muted }}>Loading…</div>
+        </WfCard>
+      </div>
+    )
+  }
 
   if (!client || !email) {
     return (
@@ -53,21 +75,28 @@ export default function WFBrief() {
 
   const folderId = folderIdFrom(folderUrl)
   const themeFilled = /Theme:\s*\S/.test(prompt) && /Audience:\s*\S/.test(prompt)
+  const weekReady   = wfWeekReady(week)
 
   const persist = () => {
     updateClient(clientId, { folderUrl, folderId })          // remember for next time
-    updateEmail(clientId, emailId, { brief: prompt, folderUrl, folderId })
+    updateEmail(clientId, emailId, {
+      brief: prompt, folderUrl, folderId,
+      week:       week ? Number(week) : null,
+      templateId: wfWeek(week)?.templateId ?? null,
+    })
   }
 
   return (
     <div style={{ maxWidth: 820, margin: '0 auto', padding: '28px 24px 64px' }}>
-      <button
-        onClick={() => { persist(); navigate(`/welcome-flow/${clientId}`) }}
-        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-                 color: t.accent, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 18 }}
-      >
-        <IconArrowLeft size={15} stroke={2.2} /> {client.name}
-      </button>
+      <WfStepNav
+        backLabel={client.name}
+        onBack={() => { persist(); navigate(`/welcome-flow/${clientId}`) }}
+        // only offered once copy exists — otherwise there is nothing to review
+        nextLabel={email.variations?.length ? 'Next: Copy' : undefined}
+        onNext={email.variations?.length
+          ? () => { persist(); navigate(`/welcome-flow/${clientId}/email/${emailId}/copy`) }
+          : undefined}
+      />
 
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <div style={{
@@ -94,13 +123,40 @@ export default function WFBrief() {
           <div style={{
             padding: '10px 12px', borderRadius: 10, border: `1px solid ${t.border}`,
             background: t.dark ? 'rgba(255,255,255,0.02)' : '#f9fafb',
-            fontSize: 13, color: t.text, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            fontSize: 13, color: t.text,
           }}>
-            <span>{client.name}</span>
-            <span style={{ fontSize: 11.5, color: t.faint }}>
-              {client.locationId ? `Location ${client.locationId.slice(0, 14)}…` : 'no location id'}
-            </span>
+            {client.name}
           </div>
+        </div>
+
+        {/* which email in the flow — decides the template and the n8n workflow */}
+        <div style={{ marginBottom: 18 }}>
+          <label style={{ fontSize: 12, fontWeight: 700, color: t.text, display: 'block', marginBottom: 6 }}>
+            Welcome Email{' '}
+            <span style={{ fontWeight: 400, color: t.muted }}>sets the template and which n8n workflow runs</span>
+          </label>
+          <select
+            value={week}
+            onChange={(e) => setWeek(e.target.value)}
+            onBlur={persist}
+            style={{
+              width: '100%', padding: '11px 12px', borderRadius: 10,
+              border: `1px solid ${t.border}`, background: t.inputBg, color: t.text,
+              fontSize: 13, fontFamily: 'Inter, sans-serif', outline: 'none', cursor: 'pointer',
+            }}
+          >
+            <option value="">Select which email this is…</option>
+            {WF_WEEKS.map(w => (
+              <option key={w.week} value={w.week}>
+                Week {w.week}{w.templateId ? '' : ' — template not built yet'}
+              </option>
+            ))}
+          </select>
+          {week && !weekReady && (
+            <div style={{ fontSize: 11.5, color: '#b45309', marginTop: 6 }}>
+              Week {week} has no template yet, so it can’t be generated.
+            </div>
+          )}
         </div>
 
         {/* folder — static info, remembered on the client */}
@@ -137,20 +193,31 @@ export default function WFBrief() {
             }}
           />
           <div style={{ fontSize: 11.5, color: t.muted, marginTop: 6 }}>
-            Fill in Theme and Audience, then generate.
+            Pick the week, fill in Theme and Audience, then generate.
           </div>
         </div>
 
         <WfButton
-          disabled={!themeFilled}
-          onClick={() => { persist(); alert('Copy generation is wired up in the next step.') }}
+          disabled={!themeFilled || !weekReady}
+          onClick={() => { persist(); alert(`Week ${week}: copy generation is wired up in the next step.`) }}
           style={{ width: '100%', justifyContent: 'center', padding: '12px 16px' }}
         >
           Generate Copy with n8n →
         </WfButton>
 
         <button
-          onClick={() => { persist(); alert('Test-data path lands in the next step.') }}
+          onClick={() => {
+            persist()
+            // skip n8n: drop the Starlight Haven variations straight into the email
+            updateEmail(clientId, emailId, {
+              variations:        WF_TEST_VARIATIONS,
+              selectedVariation: 0,
+              copy:              WF_TEST_VARIATIONS[0],
+              subject:           WF_TEST_VARIATIONS[0].subjectLine,
+              status:            'ready',
+            })
+            navigate(`/welcome-flow/${clientId}/email/${emailId}/copy`)
+          }}
           style={{
             width: '100%', marginTop: 10, padding: '10px 16px', borderRadius: 10,
             border: `1px dashed ${t.border}`, background: 'transparent', color: t.muted,

@@ -4,7 +4,7 @@
  * No Export button (deliberately, per spec).
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IconArrowLeft, IconPlus, IconMail } from '@tabler/icons-react'
 import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
@@ -37,8 +37,11 @@ export default function WFClientDetail() {
   const { clientId } = useParams()
   const navigate = useNavigate()
   const t = useWfTheme()
-  const { getClient, getEmails, counts, addEmail } = useWelcomeFlowStore()
+  const { getClient, getEmails, counts, addEmail, ensureClients, loadingClients } = useWelcomeFlowStore()
   const [filter, setFilter] = useState('all')
+
+  // clients are not persisted — refetch after a reload on this deep route
+  useEffect(() => { ensureClients() }, [ensureClients])
 
   const client = getClient(clientId)
   const emails = getEmails(clientId)
@@ -49,6 +52,16 @@ export default function WFClientDetail() {
     if (filter === 'in_progress') return emails.filter(e => !DONE.has(e.status))
     return emails
   }, [emails, filter])
+
+  if (loadingClients && !client) {
+    return (
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 24px' }}>
+        <WfCard style={{ padding: 40, textAlign: 'center' }}>
+          <div style={{ fontSize: 13, color: t.muted }}>Loading…</div>
+        </WfCard>
+      </div>
+    )
+  }
 
   if (!client) {
     return (
@@ -91,9 +104,9 @@ export default function WFClientDetail() {
           }}>{initials}</div>
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 700, color: t.text, letterSpacing: '-0.02em', margin: 0 }}>{client.name}</h1>
-            <div style={{ fontSize: 12.5, color: t.muted, marginTop: 3 }}>
-              {client.email || (client.locationId ? `Location ${client.locationId}` : 'No contact set')}
-            </div>
+            {client.email && (
+              <div style={{ fontSize: 12.5, color: t.muted, marginTop: 3 }}>{client.email}</div>
+            )}
           </div>
         </div>
         <WfButton onClick={startNewEmail}>

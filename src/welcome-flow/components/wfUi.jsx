@@ -103,6 +103,25 @@ export function WfStatusPill({ status }) {
   )
 }
 
+/**
+ * Back / Next row pinned above the step content, same shape as the Weekly Email
+ * Campaign's steps. Next is omitted when a step has nowhere to go yet.
+ */
+export function WfStepNav({ backLabel = 'Back', onBack, nextLabel, onNext, nextDisabled = false }) {
+  const t = useWfTheme()
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      gap: 12, marginBottom: 18,
+    }}>
+      <WfButton variant="ghost" onClick={onBack}>&larr; {backLabel}</WfButton>
+      {onNext
+        ? <WfButton onClick={onNext} disabled={nextDisabled}>{nextLabel} &rarr;</WfButton>
+        : <span />}
+    </div>
+  )
+}
+
 export function WfPageHeader({ title, subtitle, right }) {
   const t = useWfTheme()
   return (
