@@ -15,7 +15,7 @@
  */
 
 export const WF_WEEKS = [
-  { week: 1, templateId: 30 },
+  { week: 1, templateId: 31 },   // Week 1 WF — the real welcome-offer template
   { week: 2, templateId: null },
   { week: 3, templateId: null },
   { week: 4, templateId: null },

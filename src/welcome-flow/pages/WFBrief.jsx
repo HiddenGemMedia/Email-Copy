@@ -15,6 +15,27 @@ import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
 import { useWfTheme, WfCard, WfButton, WfInput, WfStepNav } from '../components/wfUi'
 import { WF_WEEKS, wfWeek, wfWeekReady } from '../wfWeeks'
 import { WF_TEST_VARIATIONS } from '../wfTestData'
+import { wfGenerateCopy } from '../../lib/api'
+import { extractWfVariations } from '../parseWfCopy'
+
+const POLL_INTERVAL_MS  = 2_000
+const POLL_MAX_ATTEMPTS = 60      // 120s — the workflow runs 45-50s
+
+/**
+ * n8n answers the webhook immediately and posts the finished copy to
+ * copy-callback when it is done, so nothing has to stay open for the ~46s the
+ * workflow takes. Same mechanism the Weekly Email Campaign uses.
+ */
+async function pollForResult(jobId) {
+  for (let i = 0; i < POLL_MAX_ATTEMPTS; i++) {
+    await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
+    const res  = await fetch(`/.netlify/functions/copy-callback?jobId=${encodeURIComponent(jobId)}`)
+    const data = await res.json()
+    if (data.status === 'done')  return data.copy
+    if (data.status === 'error') throw new Error(data.error || 'n8n workflow failed')
+  }
+  throw new Error('No response after 2 minutes. Check that the n8n workflow is active and posting to the callback URL.')
+}
 
 /** GHL folder links carry the id as ?folderId=… */
 function folderIdFrom(url = '') {
@@ -37,6 +58,9 @@ export default function WFBrief() {
   const [folderUrl, setFolderUrl] = useState('')
   const [prompt, setPrompt]       = useState('')
   const [week, setWeek]           = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [genError, setGenError]     = useState('')
+  const [elapsed, setElapsed]       = useState(0)
 
   useEffect(() => {
     if (!client) return
@@ -84,6 +108,44 @@ export default function WFBrief() {
       week:       week ? Number(week) : null,
       templateId: wfWeek(week)?.templateId ?? null,
     })
+  }
+
+  async function handleGenerate() {
+    persist()
+    setGenerating(true); setGenError(''); setElapsed(0)
+    const tick = setInterval(() => setElapsed(s => s + 1), 1000)
+    try {
+      // Returns a jobId straight away; the copy arrives via copy-callback.
+      const { jobId } = await wfGenerateCopy({
+        week:       Number(week),
+        prompt,
+        clientName: client.name,
+        locationId: client.locationId,
+      })
+      const result = await pollForResult(jobId)
+
+      // the workflow writes Markdown prose, so it gets parsed into fields here
+      const variations = extractWfVariations(result)
+      if (!variations.length) {
+        throw new Error('n8n replied but no variations could be read from it. Check the workflow output format.')
+      }
+
+      updateEmail(clientId, emailId, {
+        variations,
+        selectedVariation: 0,
+        copy:              variations[0],
+        subject:           variations[0]?.subjectLine || '',
+        status:            'ready',
+        needsHumanReview:  !!result.needsHumanReview,
+        copywriterNotes:   result.copywriterNotes || '',
+      })
+      navigate(`/welcome-flow/${clientId}/email/${emailId}/copy`)
+    } catch (e) {
+      setGenError(e.message)
+    } finally {
+      clearInterval(tick)
+      setGenerating(false)
+    }
   }
 
   return (
@@ -198,12 +260,21 @@ export default function WFBrief() {
         </div>
 
         <WfButton
-          disabled={!themeFilled || !weekReady}
-          onClick={() => { persist(); alert(`Week ${week}: copy generation is wired up in the next step.`) }}
+          disabled={!themeFilled || !weekReady || generating}
+          onClick={handleGenerate}
           style={{ width: '100%', justifyContent: 'center', padding: '12px 16px' }}
         >
-          Generate Copy with n8n →
+          {generating ? `Writing copy… ${elapsed}s` : 'Generate Copy with n8n →'}
         </WfButton>
+
+        {genError && (
+          <div style={{ fontSize: 12.5, color: '#dc2626', marginTop: 10 }}>{genError}</div>
+        )}
+        {generating && (
+          <div style={{ fontSize: 11.5, color: t.muted, marginTop: 8, textAlign: 'center' }}>
+            n8n usually takes 35–45 seconds. Leaving this page cancels the wait.
+          </div>
+        )}
 
         <button
           onClick={() => {

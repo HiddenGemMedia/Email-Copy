@@ -72,6 +72,12 @@ export const sendTestEmail = ({ html, subject }) =>
 export const notifyChat = ({ clientName, previewUrl, approvedBy }) =>
   post('/notify-chat', { clientName, previewUrl, approvedBy })
 
+// ── Welcome Flow copy generation ─────────────────────────────────
+// Only the week number goes over the wire; the server resolves it to that
+// week's n8n webhook so the URLs never reach the browser.
+export const wfGenerateCopy = ({ week, prompt, clientName, locationId }) =>
+  post('/wf-generate-copy', { week, prompt, clientName, locationId })
+
 // ── Logo upload → GHL media library + save logo_url to Email_Client_API ──
 // apiKey is optional: omit it and the function resolves it from locationId.
 export const uploadLogo = ({ base64, mimeType, fileName, locationId, apiKey, clientRowIndex }) =>

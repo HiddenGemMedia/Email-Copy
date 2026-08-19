@@ -120,9 +120,8 @@ export default function WFCopy() {
   const cards  = active.propertyCards || []
 
   const persist = (nextVars = vars, nextPicked = picked) => {
-    // Test Template (the Week 2 clone) reads copy.subhead; Week 1 WF reads
-    // Section Subhead instead. There is no separate Subhead field in the editor
-    // any more, so this keeps the older template fed without duplicating input.
+    // Section Subhead is the single source; mirror it onto subhead so any
+    // template that reads copy.subhead stays fed without a duplicate field.
     const withSubhead = nextVars.map(v => ({ ...v, subhead: v.sectionSubhead || '' }))
     updateEmail(clientId, emailId, {
       variations:        withSubhead,
