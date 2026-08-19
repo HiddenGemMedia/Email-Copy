@@ -19,10 +19,13 @@ import { handler as proxyImage }         from '../netlify/functions/proxy-image.
 import { handler as pushHtmlToGhl }      from '../netlify/functions/push-html-to-ghl.js'
 import { handler as pushToGhl }          from '../netlify/functions/push-to-ghl.js'
 import { handler as recommendTemplate }  from '../netlify/functions/recommend-template.js'
+import { handler as sendTestEmail }      from '../netlify/functions/send-test-email.js'
 import { handler as submitFeedback }     from '../netlify/functions/submit-feedback.js'
 import { handler as uploadLogo }         from '../netlify/functions/upload-logo.js'
 import { handler as uploadScreenshot }   from '../netlify/functions/upload-screenshot.js'
 import { handler as wfClients }          from '../netlify/functions/wf-clients.js'
+import { handler as wfGenerateCopy }     from '../netlify/functions/wf-generate-copy.js'
+import { handler as wfPushEmail }        from '../netlify/functions/wf-push-email.js'
 
 export const config = {
   api: {
@@ -52,10 +55,13 @@ const HANDLERS = {
   'push-html-to-ghl':    pushHtmlToGhl,
   'push-to-ghl':         pushToGhl,
   'recommend-template':  recommendTemplate,
+  'send-test-email':     sendTestEmail,
   'submit-feedback':     submitFeedback,
   'upload-logo':         uploadLogo,
   'upload-screenshot':   uploadScreenshot,
   'wf-clients':          wfClients,
+  'wf-generate-copy':    wfGenerateCopy,
+  'wf-push-email':       wfPushEmail,
 }
 
 export default async function handler(req, res) {
