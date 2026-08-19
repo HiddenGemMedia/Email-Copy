@@ -13,10 +13,10 @@
 
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { IconCheck, IconRotate } from '@tabler/icons-react'
+import { IconCheck, IconRotate, IconDatabase } from '@tabler/icons-react'
 import { useWelcomeFlowStore } from '../store/welcomeFlowStore'
 import { useWfTheme, WfCard, WfButton, WfStepNav } from '../components/wfUi'
-import { pushHtmlToGHL, notifyChat } from '../../lib/api'
+import { pushHtmlToGHL, notifyChat, wfPushEmail } from '../../lib/api'
 
 export default function WFApprove() {
   const { clientId, emailId } = useParams()
@@ -32,6 +32,9 @@ export default function WFApprove() {
   const [notes, setNotes]     = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
+  const [dbSaving, setDbSaving] = useState(false)
+  const [dbMsg, setDbMsg]       = useState('')
+  const [dbErr, setDbErr]       = useState('')
   const [done, setDone]       = useState(false)
   const [previewUrl, setPreviewUrl] = useState('')
 
@@ -59,6 +62,27 @@ export default function WFApprove() {
   }
 
   const copy = email.copy || {}
+
+  /** Save this email — all three variations plus both HTML versions — into
+   *  email_wf_emails. Re-pushing updates the same row rather than adding one. */
+  async function handlePushDatabase() {
+    setDbSaving(true); setDbErr(''); setDbMsg('')
+    try {
+      const res = await wfPushEmail({
+        clientId:   clientId,
+        clientName: client.name,
+        position:   email.position,
+        dbId:       email.dbId || null,
+        email,
+      })
+      updateEmail(clientId, emailId, { dbId: res.id })
+      setDbMsg(`${res.action === 'updated' ? 'Updated' : 'Saved'} — ${res.variations} variations, ${(res.renderedBytes/1024).toFixed(1)} KB of HTML`)
+    } catch (e) {
+      setDbErr(e.message)
+    } finally {
+      setDbSaving(false)
+    }
+  }
 
   async function handleApprove() {
     setLoading(true); setError('')
@@ -196,6 +220,24 @@ export default function WFApprove() {
       {error && (
         <div style={{ fontSize: 12.5, color: '#dc2626', marginTop: 12 }}>{error}</div>
       )}
+
+      {/* Save to the Welcome Flow database — independent of the GHL push, so
+          the copy and HTML can be stored without publishing anything. */}
+      <div style={{ marginTop: 16 }}>
+        <WfButton
+          variant="ghost"
+          onClick={handlePushDatabase}
+          disabled={dbSaving}
+          style={{ width: '100%', justifyContent: 'center', padding: '12px 16px' }}
+        >
+          <IconDatabase size={15} stroke={2} /> {dbSaving ? 'Saving to database…' : 'Push to Database'}
+        </WfButton>
+        {dbMsg && <div style={{ fontSize: 12, color: '#16a34a', marginTop: 8, textAlign: 'center' }}>✓ {dbMsg}</div>}
+        {dbErr && <div style={{ fontSize: 12, color: '#dc2626', marginTop: 8, textAlign: 'center' }}>⚠ {dbErr}</div>}
+        <div style={{ fontSize: 11.5, color: t.muted, marginTop: 8, textAlign: 'center' }}>
+          Stores all {(email.variations || []).length || 0} variations, the preview HTML and the rendered HTML.
+        </div>
+      </div>
 
       <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
         <WfButton

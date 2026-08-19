@@ -48,7 +48,6 @@ const CARD_FIELDS = [
   { key: 'name',        label: 'Card Name',        hint: 'Exact from the brief — never invented or shortened' },
   { key: 'stats',       label: 'Card Stats',       hint: 'bed | bath | guests, in that order. Missing figure → leave blank' },
   { key: 'description', label: 'Card Description', hint: '5–8 words. What the guest does with it' },
-  { key: 'ctaText',     label: 'Card CTA',         hint: '2–3 words. Identical on every card, by design' },
 ]
 
 export default function WFCopy() {
@@ -158,6 +157,17 @@ export default function WFCopy() {
       return { ...v, propertyCards: (v.propertyCards || []).filter((_, ci) => ci !== cardIndex) }
     })
     setVars(next); persist(next)
+  }
+
+  /* The spec says every card's CTA reads the same, so it is edited once here and
+     written to all of them. Each card still carries its own ctaText, so the
+     template and the database row keep the same shape. */
+  const editAllCardCtas = (value) => {
+    const next = vars.map((v, i) => {
+      if (i !== picked) return v
+      return { ...v, propertyCards: (v.propertyCards || []).map(c => ({ ...c, ctaText: value })) }
+    })
+    setVars(next)
   }
 
   const editCard = (cardIndex, key, value) => {
@@ -280,6 +290,14 @@ export default function WFCopy() {
             <IconPlus size={13} stroke={2.4} /> Add stay
           </WfButton>
         </div>
+
+        {/* one CTA for every card — the spec calls for identical wording */}
+        {cards.length > 0 && fieldRow(
+          { key: 'cardCtaShared', label: 'Card CTA', hint: '2–3 words. Applies to every card' },
+          cards[0]?.ctaText,
+          editAllCardCtas,
+          false,
+        )}
 
         {cards.length === 0 ? (
           <div style={{ padding: '22px 18px', fontSize: 12.5, color: t.muted }}>

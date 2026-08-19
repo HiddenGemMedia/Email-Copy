@@ -98,7 +98,8 @@ export default function WFBrief() {
   }
 
   const folderId = folderIdFrom(folderUrl)
-  const themeFilled = /Theme:\s*\S/.test(prompt) && /Audience:\s*\S/.test(prompt)
+  // any text will do — the prompt goes to n8n as typed, no required shape
+  const promptFilled = prompt.trim().length > 0
   const weekReady   = wfWeekReady(week)
 
   const persist = () => {
@@ -255,12 +256,12 @@ export default function WFBrief() {
             }}
           />
           <div style={{ fontSize: 11.5, color: t.muted, marginTop: 6 }}>
-            Pick the week, fill in Theme and Audience, then generate.
+            Pick the week and write your prompt — any text works.
           </div>
         </div>
 
         <WfButton
-          disabled={!themeFilled || !weekReady || generating}
+          disabled={!promptFilled || !weekReady || generating}
           onClick={handleGenerate}
           style={{ width: '100%', justifyContent: 'center', padding: '12px 16px' }}
         >

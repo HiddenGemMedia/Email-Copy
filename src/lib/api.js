@@ -72,6 +72,11 @@ export const sendTestEmail = ({ html, subject }) =>
 export const notifyChat = ({ clientName, previewUrl, approvedBy }) =>
   post('/notify-chat', { clientName, previewUrl, approvedBy })
 
+// ── Welcome Flow: save an email to email_wf_emails ───────────────
+// Pass dbId to update the row a previous push created, instead of adding another.
+export const wfPushEmail = ({ clientId, clientName, position, dbId, email }) =>
+  post('/wf-push-email', { clientId, clientName, position, dbId, email })
+
 // ── Welcome Flow copy generation ─────────────────────────────────
 // Only the week number goes over the wire; the server resolves it to that
 // week's n8n webhook so the URLs never reach the browser.
