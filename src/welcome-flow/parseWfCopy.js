@@ -144,6 +144,8 @@ const JSON_KEY_MAP = {
   cta:              'ctaText',
   cta_text:         'ctaText',
   cta_url:          'ctaUrl',
+  final_cta:        'ctaText',
+  final_cta_url:    'ctaUrl',
   pov:              'name',
   variation_name:   'name',
   // camelCase spellings — the workflow has emitted both over time
