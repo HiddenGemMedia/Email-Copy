@@ -165,6 +165,8 @@ const JSON_KEY_MAP = {
   povname:          'name',
   ctatext:          'ctaText',
   ctaurl:           'ctaUrl',
+  finalcta:         'ctaText',      // the workflow's name for the bottom CTA
+  finalctaurl:      'ctaUrl',
 }
 
 const JSON_CARD_MAP = {
