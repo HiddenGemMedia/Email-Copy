@@ -146,6 +146,25 @@ const JSON_KEY_MAP = {
   cta_url:          'ctaUrl',
   pov:              'name',
   variation_name:   'name',
+  // camelCase spellings — the workflow has emitted both over time
+  heroheadline:     'headlineText',
+  herocta:          'heroCtaText',
+  introcta:         'heroCtaText',   // the hero pill, e.g. "Use code BUY3 at checkout"
+  introbody:        'bodyText',
+  bodyblock:        'bodyText',
+  bodyblocktitle:   'bodyBlock2Title',
+  closingnudge:     'bodyBlock2',
+  closingnudgetitle:'bodyBlock2Title',
+  closingline:      'closingLine',
+  sectioneyebrow:   'sectionEyebrow',
+  sectionheadline:  'sectionHeadline',
+  sectionsubhead:   'sectionSubhead',
+  campaigneyebrow:  'campaignEyebrow',
+  subjectline:      'subjectLine',
+  previewtext:      'previewText',
+  povname:          'name',
+  ctatext:          'ctaText',
+  ctaurl:           'ctaUrl',
 }
 
 const JSON_CARD_MAP = {
@@ -160,6 +179,12 @@ const JSON_CARD_MAP = {
   cta_text:         'ctaText',
   card_cta_url:     'ctaUrl',
   cta_url:          'ctaUrl',
+  // camelCase spellings
+  cardname:         'name',
+  cardstats:        'stats',
+  carddescription:  'description',
+  cardcta:          'ctaText',
+  cardctaurl:       'ctaUrl',
 }
 
 const snakeToCamel = (k) => k.replace(/[_\s]+(\w)/g, (_, c) => c.toUpperCase())
@@ -200,12 +225,12 @@ function mapVariation(raw, i) {
       cards = (Array.isArray(v) ? v : []).map(mapCard).filter(c => c.name || c.description)
       continue
     }
-    if (lk === 'variation' || lk === 'id') continue          // handled below
+    if (lk === 'variation' || lk === 'variationnumber' || lk === 'id') continue   // handled below
     const key = JSON_KEY_MAP[lk] || snakeToCamel(k)
     if (v != null && typeof v !== 'object') out[key] = String(v).trim()
   }
   return {
-    id: Number(raw?.variation) || i + 1,
+    id: Number(raw?.variation ?? raw?.variationNumber) || i + 1,
     name: out.name || `Variation ${i + 1}`,
     ...out,
     subhead: out.sectionSubhead || out.subhead || '',
@@ -252,8 +277,21 @@ export function parseWfCopy(text) {
  */
 export function extractWfVariations(payload) {
   if (!payload) return []
-  // already structured — nothing to parse
-  if (Array.isArray(payload.variations) && payload.variations.length) return payload.variations
+
+  /* n8n's HTTP Request node needs `{{ { ...$json, jobId } }}`. Written without
+     the spread it sends `{ $json: {...}, jobId }`, burying everything one level
+     down. That is easy to get wrong in the n8n UI and silently yields no copy,
+     so unwrap it rather than fail. */
+  if (payload.$json && typeof payload.$json === 'object') {
+    payload = { ...payload.$json, ...payload }
+  }
+  /* A real variations array — but still run it through the key mapper. The
+     workflow uses its own names (heroHeadline, introCTA, povName, cardName…)
+     and returning it raw would hand the template fields it cannot read. The
+     mapping is idempotent, so copy already in our own names passes through. */
+  if (Array.isArray(payload.variations) && payload.variations.length) {
+    return payload.variations.map(mapVariation).filter(v => v.subjectLine || v.headlineText)
+  }
 
   const text =
     (typeof payload?.structured?.output === 'string' && payload.structured.output) ||

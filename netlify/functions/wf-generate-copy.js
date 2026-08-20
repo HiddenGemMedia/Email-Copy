@@ -120,7 +120,9 @@ export const handler = async (event) => {
     const brandData = await fetchBrandData(clientName)
     console.log(`[wf-generate-copy] week=${weekNum} client="${clientName}" brandData=${brandData ? 'found' : 'not found'}`)
 
-    const callbackUrl = `${process.env.CALLBACK_BASE_URL || process.env.URL}/.netlify/functions/copy-callback`
+    // strip a trailing slash so the URL cannot come out with a double slash
+    const base = (process.env.CALLBACK_BASE_URL || process.env.URL || '').replace(/\/+$/, '')
+    const callbackUrl = `${base}/.netlify/functions/copy-callback`
 
     // Fire and return — do NOT await the copy. n8n must be set to respond
     // immediately; if it is left on "when last node finishes" this request
